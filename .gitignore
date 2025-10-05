@@ -1,0 +1,80 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# VS Code
+.vscode/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.old
+*.orig
+*.swp
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Entity Framework
+Migrations/
+
+# Publish directory
+publish/
+
+# Windows / OS-specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.DS_Store
+
+# Others
+*.dbmdl
+*.dbproj.schemaview
+*.pdb
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# ReSharper
+_ReSharper*/
+*.ReSharper
+resharper-host/
+
+# Rider Caches
+.idea/.idea.*
+
+# Docker
+**/docker-compose.override.yml
+**/docker-compose*.yml
+
+# Local environment files
+.env
+.env.*
+
+# Optional: exclude secret settings files (if used)
+secrets.json

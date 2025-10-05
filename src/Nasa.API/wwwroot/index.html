@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nasa API Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1rem;
+            margin-bottom: 25px;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #4a5568;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin: 30px 0 0 0;
+            align-items: flex-start;
+        }
+
+        .status-icon {
+            font-size: 1.3rem;
+            margin-right: 14px;
+            width: 28px;
+            text-align: center;
+        }
+
+        .status-title {
+            color: #2d3748;
+            font-weight: 500;
+            min-width: 140px;
+            font-size: 1rem;
+        }
+
+        .status-value {
+            color: #4a5568;
+            font-size: 1rem;
+            font-weight: 400;
+            margin-left: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-online {
+            background-color: #48bb78;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #c53030;
+        }
+
+        .button {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .button:hover {
+            background: #2d3748;
+        }
+
+        .button.swagger {
+            background: #85ea2d;
+            color: #1a202c;
+        }
+
+        .button.swagger:hover {
+            background: #6bc91f;
+        }
+
+        .last-updated {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #4a5568;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer a:hover {
+            color: #2d3748;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Nasa API</h1>
+    <p class="subtitle">Dashboard de Status do Sistema</p>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="content" style="display: none;">
+        <div class="status-list" id="statusList">
+            <!-- Lista de status será inserida aqui -->
+        </div>
+        <div class="last-updated" id="lastUpdated">
+            <!-- Last updated time will be inserted aqui -->
+        </div>
+        <div style="margin-top: 20px;">
+            <a href="/swagger/index.html" class="button swagger" target="_blank">Documentação Swagger</a>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 QKDell. Todos os direitos reservados.</p>
+            <p>Visite nosso site: <a href="https://www.qkdell.com" target="_blank">www.qkdell.com</a></p>
+        </div>
+    </div>
+
+    <div id="error" style="display: none;">
+        <div class="error-message">
+            <strong>❌ Erro de Conexão</strong>
+            <p>Não foi possível conectar com a API. Verifique se o servidor está rodando.</p>
+            <button class="button" onclick="loadApiInfo()">Tentar Novamente</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    class ApiDashboard {
+        constructor() {
+            this.baseUrl = this.getBaseUrl();
+            this.apiUrl = `${this.baseUrl}api/Info/v1`;
+            this.maxRetries = 3;
+            this.retryDelay = 2000;
+        }
+
+        getBaseUrl() {
+            return document.URL.replace(/\/[^\/]*$/, '/');
+        }
+
+        async loadApiInfo() {
+            this.showLoading();
+
+            try {
+                const data = await this.fetchWithRetry(this.apiUrl);
+                this.displaySuccess(data);
+            } catch (error) {
+                console.error('API Error:', error);
+                this.displayError();
+            }
+        }
+
+        async fetchWithRetry(url, retries = this.maxRetries) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.log(`Tentativa ${i + 1} falhou:`, error.message);
+
+                    if (i === retries - 1) {
+                        throw error;
+                    }
+
+                    await this.delay(this.retryDelay);
+                }
+            }
+        }
+
+        delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        showLoading() {
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        displaySuccess(data) {
+            const statusList = document.getElementById('statusList');
+            const lastUpdated = document.getElementById('lastUpdated');
+            console.log(data);
+            // Limpa conteúdo anterior
+            statusList.innerHTML = '';
+
+            // Monta lista de status
+            const items = [
+                {
+                    icon: '🛠️',
+                    title: 'Versão da API',
+                    value: data.version || 'N/A'
+                },
+                {
+                    icon: '🖥️',
+                    title: 'Data do Servidor',
+                    value: this.formatDate(data.dateServer) || 'N/A'
+                },
+                {
+                    icon: '🗄️',
+                    title: 'Data do Banco',
+                    value: this.formatDate(data.dateDatabase) || 'N/A'
+                },
+                {
+                    icon: '👤',
+                    title: 'Usuário do Banco',
+                    value: data.userDatabaseName || 'N/A'
+                }
+            ];
+            if (data.databaseName) {
+                items.push({
+                    icon: '🏷️',
+                    title: 'Nome do Banco',
+                    value: data.databaseName
+                });
+            }
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'status-item';
+                div.innerHTML = `
+                    <span class="status-icon">${item.icon}</span>
+                    <span class="status-title">${item.title}:</span>
+                    <span class="status-value">${item.value}</span>
+                `;
+                statusList.appendChild(div);
+            });
+
+            // Atualiza última atualização
+            lastUpdated.innerHTML = `
+                <span class="status-indicator status-online"></span>
+                Última atualização: ${new Date().toLocaleString('pt-BR')}
+            `;
+
+            // Exibe conteúdo
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+        }
+
+        displayError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        formatDate(dateString) {
+            if (!dateString) return null;
+
+            try {
+                const safeDateString = this.parseDateString(dateString);
+                const date = new Date(safeDateString);
+                return date.toLocaleString('pt-BR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (error) {
+                return dateString;
+            }
+        }
+
+        parseDateString(dateString) {
+            // Exemplo para converter "25/06/2024 12:34:56" -> "2024-06-25T12:34:56"
+            const [datePart, timePart] = dateString.split(' ');
+            const [day, month, year] = datePart.split('/');
+            return `${year}-${month}-${day}T${timePart}`;
+        }
+    }
+
+    // Initialize dashboard
+    const dashboard = new ApiDashboard();
+
+    // Load API info when page loads
+    window.addEventListener('load', () => {
+        console.log('Dashboard iniciado');
+        console.log('URL:', document.URL);
+        console.log('API URL:', dashboard.apiUrl);
+
+        dashboard.loadApiInfo();
+    });
+
+    // Global function for retry button
+    function loadApiInfo() {
+        dashboard.loadApiInfo();
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+        dashboard.loadApiInfo();
+    }, 30000);
+</script>
+</body>
+</html>

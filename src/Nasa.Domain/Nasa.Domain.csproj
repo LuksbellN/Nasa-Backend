@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <RootNamespace>Nasa.Domain</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Nasa.Resources\Nasa.Resources.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    </ItemGroup>
+
+</Project>

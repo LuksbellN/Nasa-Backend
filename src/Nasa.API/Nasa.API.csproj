@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>47df68a6-4357-45d1-a8da-9ef4eca3ce23</UserSecretsId>
+        <RootNamespace>Nasa.API</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Grpc" Version="2.46.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1"/>
+        <PackageReference Include="Npgsql" Version="9.0.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Nasa.Domain\Nasa.Domain.csproj" />
+      <ProjectReference Include="..\Nasa.IoC\Nasa.IoC.csproj" />
+      <ProjectReference Include="..\Nasa.Resources\Nasa.Resources.csproj" />
+    </ItemGroup>
+
+</Project>
