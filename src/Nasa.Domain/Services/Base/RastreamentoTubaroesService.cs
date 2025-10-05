@@ -65,38 +65,36 @@ public class RastreamentoTubaroesService : IRastreamentoTubaroesService
 
         return result;
     }
-    //
-    // public async Task<ProcessResult> Insert(RastreamentoTubaroes item)
-    // {
-    //     ProcessResult processResult = new ProcessResult() { ProcessMessage = AppStrings.INF_RegistroCriadoSucesso };
-    //
-    //     try
-    //     {
-    //         if (await UkExists(item))
-    //         {
-    //             return new ProcessResult()
-    //                 { Success = false, ProcessMessage = AppStrings.ERR_UsernameRegistrado };
-    //         }
-    //
-    //         item.SenhaHash = BCrypt.Net.BCrypt.HashPassword(item.SenhaHash);
-    //
-    //         await _rastreamentoTubaroesRepository.Insert(item);
-    //     }
-    //     catch (ProcessException ex)
-    //     {
-    //         processResult.RecordException(ex, ex.Message);
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         processResult.RecordException(ex, AppStrings.ERR_FalhaInserirRegistro);
-    //     }
-    //
-    //     return processResult;
-    // }
+    
+    public async Task<ProcessResult> Insert(RastreamentoTubaroes item)
+    {
+        ProcessResult processResult = new ProcessResult() { ProcessMessage = AppStrings.INF_RegistroCriadoSucesso };
+    
+        try
+        {
+            if (await PkExists(item))
+            {
+                return new ProcessResult()
+                    { Success = false, ProcessMessage = AppStrings.ERR_UsernameRegistrado };
+            }
+    
+            await _rastreamentoTubaroesRepository.Insert(item);
+        }
+        catch (ProcessException ex)
+        {
+            processResult.RecordException(ex, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            processResult.RecordException(ex, AppStrings.ERR_FalhaInserirRegistro);
+        }
+    
+        return processResult;
+    }
 
     private bool PkInformed(RastreamentoTubaroes item)
     {
-        return string.IsNullOrEmpty(item.Id.ToString()) || string.IsNullOrEmpty(item.Time.ToString());
+        return string.IsNullOrEmpty(item.Id.ToString()) || string.IsNullOrEmpty(item.Tempo.ToString());
     }
 
     private async Task<bool> PkExists(RastreamentoTubaroes item)
@@ -104,7 +102,7 @@ public class RastreamentoTubaroesService : IRastreamentoTubaroesService
         var query = await _rastreamentoTubaroesRepository.CountSelect(new RastreamentoTubaroes()
         {
             Id = item.Id,
-            Time = item.Time,
+            Tempo = item.Tempo,
         });
 
         return query > 0;

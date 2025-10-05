@@ -12,3 +12,10 @@ public static class AccessType
     public const string Query = "Q";
     public const string Null = "N";
 }
+
+public enum Comportamentos
+{
+    Busca = 0,
+    Forrageando = 1,
+    Transitando = 2
+}

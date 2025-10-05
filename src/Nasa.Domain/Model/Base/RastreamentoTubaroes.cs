@@ -16,8 +16,8 @@ public class RastreamentoTubaroes: BaseModel
     [DataMember(Name = "id")]
     public int Id { get; set; }
     
-    [DataMember(Name = "time")]
-    public string Time { get; set; }
+    [DataMember(Name = "tempo")]
+    public DateTime? Tempo { get; set; }
     
     [DataMember(Name = "lat")]
     public int Lat { get; set; }

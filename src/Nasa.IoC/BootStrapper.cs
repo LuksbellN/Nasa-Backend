@@ -46,6 +46,8 @@ public static class BootStrapper
             services.AddScoped<IRastreamentoTubaroesRepository, RastreamentoTubaroesRepository>();
             services.AddScoped<IRastreamentoTubaroesService, RastreamentoTubaroesService>();
             
+            services.AddScoped<IHistoricoAgregadoRepository, HistoricoAgregadoRepository>();
+            services.AddScoped<IHistoricoAgregadoService, HistoricoAgregadoService>();
         }
 
     }

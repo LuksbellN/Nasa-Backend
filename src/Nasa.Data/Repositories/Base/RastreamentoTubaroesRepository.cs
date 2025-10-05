@@ -11,7 +11,7 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
     private const string selectQuery = @"
         SELECT 
             rast.id as Id,
-            rast.time as Time,
+            rast.tempo as Tempo,
             rast.temp_cC as TempCc,
             rast.lat as Lat,
             rast.lon as Lon,
@@ -38,22 +38,17 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         return result;
     }
 
-    public async Task<RastreamentoTubaroes> SelectById(RastreamentoTubaroes item)
+    public async Task<IEnumerable<RastreamentoTubaroes>> SelectById(RastreamentoTubaroes item)
     {
         var select = BuildSelectQuery(item);
 
         var result = await this.QueryAsync<RastreamentoTubaroes>(
             item.Pagination.UsesPagination(),
             select.query,
-            select.parameters
+            GetParametersForSelect(item)
         );
 
-        if (result.Count() == 0)
-        {
-            throw new ProcessException(AppStrings.ERR_RegistroNaoEncontrado);
-        }
-
-        return result.First();
+        return result;
     }
 
     public async Task<long> CountSelect(RastreamentoTubaroes item)
@@ -63,39 +58,26 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         var resultado = await this.QueryAsync<long>(
             false,
             select.query,
-            select.parameters
+            GetParametersForSelect(item)
         );
 
         return resultado.FirstOrDefault();
     }
 
-    public async Task<bool> CheckReferences(RastreamentoTubaroes obj)
+    public async Task<int> Insert(RastreamentoTubaroes item)
     {
-        const string sql =
-            @"
-                    SELECT 
-                        (SELECT COUNT(*) FROM usuarios_paginas WHERE id_usuario = @IdUsuario) as TotalRefs
-                 ";
-
-        int result = await ExecuteScalarAsync(sql, obj);
-
-        return result <= 0;
+        const string sql = @"
+                INSERT INTO rastreamento_tubaroes (
+                    id, tempo, lat, lon, p_forrageio, comportamento,
+                    chlor_a_ambiente, ssha_ambiente, created_at, temp_cc
+                )
+                VALUES (
+                    @Id, @Tempo, @Lat, @Lon, @pForrageio, @Comportamento,
+                    @ChlorAAmbiente,  @SshAAmbiente, Now(), @TempCc
+                )";
+    
+        return await ExecuteAsync(sql, item);
     }
-
-    // public async Task<int> Insert(RastreamentoTubaroes item)
-    // {
-    //     const string sql = @"
-    //             INSERT INTO usuarios (
-    //                 nome, email, senha_hash, cpf, 
-    //                 username, is_active, created_at, updated_at, updated_by
-    //             )
-    //             VALUES (
-    //                 @Nome, @Email, @SenhaHash, @Cpf,
-    //                 @Username, UPPER(@IsActive), NOW(), NOW(), @UpdatedBy
-    //             )";
-    //
-    //     return await ExecuteAsync(sql, item);
-    // }
 
     private object GetParametersForSelect(RastreamentoTubaroes item)
     {
@@ -103,7 +85,7 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         {
             // PK
             item.Id,
-            item.Time,
+            item.Tempo,
             // Status
             item.Comportamento,
             // Columns Filters
@@ -130,7 +112,7 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         var orderByClause = BuildOrderByClause(item);
 
         var query = countOnly
-            ? $"SELECT COUNT(*) FROM rastreamentos_tubaroes rast {whereClause}"
+            ? $"SELECT COUNT(*) FROM rastreamento_tubaroes rast {whereClause}"
             : $"{selectQuery} {whereClause} {orderByClause}";
 
         return (query, parameters);
@@ -149,10 +131,10 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
             parameters.Add("Id", item.Id);
         }
 
-        if (!string.IsNullOrEmpty(item.Time))
+        if (item.Tempo.HasValue)
         {
-            conditions.Add("rast.time = @Time");
-            parameters.Add("Time", item.Time);
+            conditions.Add("rast.tempo = @Tempo");
+            parameters.Add("Tempo", item.Tempo.Value);
         }
         
         if (item.Comportamento > 0)
@@ -178,12 +160,12 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         {
             var searchConditions = new[]
             {
-                "UPPER(rast.id) LIKE UPPER(@DefaultFilter)",
-                "UPPER(rast.time) LIKE UPPER(@DefaultFilter)",
-                "UPPER(rast.temp_cc) LIKE UPPER(@DefaultFilter)",
-                "UPPER(rast.comportamento) LIKE UPPER(@DefaultFilter)",
-                "UPPER(rast.lat) LIKE UPPER(@DefaultFilter)",
-                "UPPER(rast.lon) LIKE UPPER(@DefaultFilter)",
+                "CAST(rast.id AS TEXT) LIKE UPPER(@DefaultFilter)",
+                "TO_CHAR(rast.tempo, 'YYYY-MM-DD HH24:MI:SS') LIKE UPPER(@DefaultFilter)",
+                "CAST(rast.temp_cc AS TEXT) LIKE UPPER(@DefaultFilter)",
+                "CAST(rast.comportamento AS TEXT) LIKE UPPER(@DefaultFilter)",
+                "CAST(rast.lat AS TEXT) LIKE UPPER(@DefaultFilter)",
+                "CAST(rast.lon AS TEXT) LIKE UPPER(@DefaultFilter)",
             };
 
             conditions.Add($"({string.Join(" OR ", searchConditions)})");
@@ -223,7 +205,7 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         var fieldMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             { "Id", "rast.id" },
-            { "Time", "rast.time" },
+            { "Tempo", "rast.tempo" },
             { "TempCc", "rast.temp_cc" },
             { "Comportamento", "rast.comportamento" },
             { "Lon", "rast.lon" },

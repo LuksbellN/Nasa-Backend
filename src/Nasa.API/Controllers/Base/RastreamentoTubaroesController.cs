@@ -34,6 +34,7 @@ public class RastreamentoTubaroesController : BaseController
         var rastreamentoTubaroes = new RastreamentoTubaroes(defFilter, newOrderBy)
         {
             Id = filter.Id,
+            Tempo = filter.Tempo,
             Lat = filter.Lat,
             Lon = filter.Lon,
             TempCc = filter.TempCc,
@@ -70,6 +71,7 @@ public class RastreamentoTubaroesController : BaseController
     
     [HttpPost]
     [Route("v1/")]
+    [IpWhitelist] // Apenas IPs autorizados podem inserir dados
     public async Task<IActionResult> Post([FromBody] RastreamentoTubaroesDto rastreamentoTubaroesDto)
     {
         BaseControllerLog.LogProccessBeingProduced(
@@ -81,7 +83,7 @@ public class RastreamentoTubaroesController : BaseController
         var rastreamentoTubaroes = new RastreamentoTubaroes()
         {
             Id = rastreamentoTubaroesDto.Id,
-            Time = rastreamentoTubaroesDto.Time,
+            Tempo = rastreamentoTubaroesDto.Tempo,
             Lat = rastreamentoTubaroesDto.Lat,
             Lon = rastreamentoTubaroesDto.Lon,
             TempCc = rastreamentoTubaroesDto.TempCc,

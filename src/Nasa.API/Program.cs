@@ -85,9 +85,11 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Configuração dos Controllers e JSON
+builder.Services.AddScoped<IpWhitelistFilter>();
 builder.Services.AddControllers(options =>
     {
         options.Filters.Add<QKDExceptionFilter>();
+        options.Filters.Add<IpWhitelistFilter>();
     })
     .AddJsonOptions(options =>
     {
