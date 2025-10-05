@@ -22,8 +22,7 @@ public class RastreamentoTubaroesController : BaseController
 
     [HttpGet]
     [Route(@"v1/")]
-    public async Task<IActionResult> Get([FromQuery] long? pageNum, [FromQuery] long? itemsPerPage,    
-        [FromQuery] string defFilter, [FromQuery] string newOrderBy, [FromQuery] RastreamentoTubaroesDto filter)
+    public async Task<IActionResult> Get([FromQuery] long? pageNum, [FromQuery] long? itemsPerPage, [FromQuery] RastreamentoTubaroesDto filter)
     {
         BaseControllerLog.LogProccessBeingProduced(
             "Get",
@@ -31,7 +30,7 @@ public class RastreamentoTubaroesController : BaseController
             string.Format("Getting 'rastreamentoTubaroes'")
         );
 
-        var rastreamentoTubaroes = new RastreamentoTubaroes(defFilter, newOrderBy)
+        var rastreamentoTubaroes = new RastreamentoTubaroes()
         {
             Id = filter.Id,
             Tempo = filter.Tempo,
@@ -72,28 +71,32 @@ public class RastreamentoTubaroesController : BaseController
     [HttpPost]
     [Route("v1/")]
     [IpWhitelist] // Apenas IPs autorizados podem inserir dados
-    public async Task<IActionResult> Post([FromBody] RastreamentoTubaroesDto rastreamentoTubaroesDto)
+    public async Task<IActionResult> Post([FromBody] IEnumerable<RoboData> roboDtos)
     {
         BaseControllerLog.LogProccessBeingProduced(
             "Post",
             "API",
             string.Format("Insert records rastreamentoTubaroes, ")
         );
+
+        var listaEntidades = new List<RastreamentoTubaroes>();
         
-        var rastreamentoTubaroes = new RastreamentoTubaroes()
+        foreach (var roboDto in roboDtos)
         {
-            Id = rastreamentoTubaroesDto.Id,
-            Tempo = rastreamentoTubaroesDto.Tempo,
-            Lat = rastreamentoTubaroesDto.Lat,
-            Lon = rastreamentoTubaroesDto.Lon,
-            TempCc = rastreamentoTubaroesDto.TempCc,
-            PForrageio = rastreamentoTubaroesDto.PForrageio,
-            Comportamento = rastreamentoTubaroesDto.Comportamento,
-            ChlorAAmbiente = rastreamentoTubaroesDto.ChlorAAmbiente,
-            SshaAmbiente = rastreamentoTubaroesDto.SshaAmbiente,
-        };
-    
-        var result = _rastreamentoTubaroesService.Insert(rastreamentoTubaroes);
+            listaEntidades.Add(new RastreamentoTubaroes()
+            {
+                Id = roboDto.Inputs.Id,
+                Tempo = DateTimeOffset.FromUnixTimeSeconds(roboDto.Inputs.Timestamp).DateTime,
+                Lat = roboDto.Inputs.Lat / 10000.0,
+                Lon = roboDto.Inputs.Lon / 10000.0,
+                TempCc = roboDto.Inputs.TempCc / 100.0,
+                PForrageio = roboDto.Outputs.PForrageio,
+                Comportamento = roboDto.Outputs.Comportamento,
+                ChlorAAmbiente = roboDto.Inputs.ChlorAAmbiente,
+                SshaAmbiente = roboDto.Inputs.SshaAmbiente,
+            });
+        }
+        var result = _rastreamentoTubaroesService.Insert(listaEntidades);
         return ApiResponseUtil.SetApiResponse(this, await result);
     }
 

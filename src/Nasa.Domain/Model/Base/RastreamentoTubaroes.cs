@@ -20,25 +20,25 @@ public class RastreamentoTubaroes: BaseModel
     public DateTime? Tempo { get; set; }
     
     [DataMember(Name = "lat")]
-    public int Lat { get; set; }
+    public double Lat { get; set; }
     
     [DataMember(Name = "lon")]
-    public int Lon { get; set; }
+    public double Lon { get; set; }
     
     [DataMember(Name = "temp_cc")]
-    public int TempCc { get; set; }
+    public double TempCc { get; set; }
     
     [DataMember(Name = "p_forrageio")]
-    public decimal PForrageio { get; set; }
+    public double PForrageio { get; set; }
     
     [DataMember(Name = "comportamento")]
-    public int Comportamento { get; set; }
+    public string Comportamento { get; set; }
     
     [DataMember(Name = "chlor_a_ambiente")]
-    public decimal ChlorAAmbiente { get; set; }
+    public double ChlorAAmbiente { get; set; }
     
     [DataMember(Name = "ssha_ambiente")]
-    public decimal SshaAmbiente { get; set; }
+    public double SshaAmbiente { get; set; }
     
     [DataMember(Name = "geometria")]
     public string Geometria { get; set; }

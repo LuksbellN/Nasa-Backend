@@ -9,12 +9,12 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Nasa.API.Controllers.Base.Filters;
 
-public class QKDExceptionFilter : IExceptionFilter
+public class NasaExceptionFilter : IExceptionFilter
 {
     private readonly ILogsService _logsService;
     private readonly IWebHostEnvironment _env;
 
-    public QKDExceptionFilter(ILogsService logsService, IWebHostEnvironment env
+    public NasaExceptionFilter(ILogsService logsService, IWebHostEnvironment env
     )
     {
         _logsService = logsService;

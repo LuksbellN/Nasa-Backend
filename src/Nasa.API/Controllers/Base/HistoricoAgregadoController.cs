@@ -26,9 +26,7 @@ public class HistoricoAgregadoController : BaseController
     [Route(@"v1/")]
     public async Task<IActionResult> Get(
         [FromQuery] long? pageNum, 
-        [FromQuery] long? itemsPerPage,    
-        [FromQuery] string defFilter, 
-        [FromQuery] string newOrderBy, 
+        [FromQuery] long? itemsPerPage,
         [FromQuery] HistoricoAgregadoDto filter)
     {
         BaseControllerLog.LogProccessBeingProduced(
@@ -37,7 +35,7 @@ public class HistoricoAgregadoController : BaseController
             "Getting 'historicoAgregado' list"
         );
 
-        var historicoAgregado = new HistoricoAgregado(defFilter, newOrderBy)
+        var historicoAgregado = new HistoricoAgregado()
         {
             Id = filter.Id,
             Data = filter.Data,

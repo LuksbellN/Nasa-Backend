@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuração do CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("QKDPolicy", policy =>
+    options.AddPolicy("NasaPolicy", policy =>
     {
         policy.AllowAnyOrigin()
             .AllowAnyMethod()
@@ -23,72 +23,18 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configuração da Autenticação JWT
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false; // Deve ser true em produção
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key não configurada"))),
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
-    };
-    options.Events = new JwtBearerEvents
-    {
-        OnChallenge = context =>
-        {
-            context.HandleResponse();
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            context.Response.ContentType = "application/json";
-            return context.Response.WriteAsJsonAsync(new { message = AppStrings.ERR_NaoAutorizadoTokenInvalidoExpirado });
-        }
-    };
-});
 
 // Configuração do Swagger
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Nasa API", Version = "v1" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
 });
 
 // Configuração dos Controllers e JSON
 builder.Services.AddScoped<IpWhitelistFilter>();
 builder.Services.AddControllers(options =>
     {
-        options.Filters.Add<QKDExceptionFilter>();
+        options.Filters.Add<NasaExceptionFilter>();
         options.Filters.Add<IpWhitelistFilter>();
     })
     .AddJsonOptions(options =>

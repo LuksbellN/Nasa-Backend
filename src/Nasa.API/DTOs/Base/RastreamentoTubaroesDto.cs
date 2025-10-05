@@ -13,11 +13,11 @@ public class RastreamentoTubaroesDto
 
     [DataMember(Name = "lon")] public int Lon { get; set; }
     [DataMember(Name = "temp_cc")] public int TempCc { get; set; }
-    [DataMember(Name = "p_forrageio")] public decimal PForrageio { get; set; }
-    [DataMember(Name = "comportamento")] public int Comportamento { get; set; }
+    [DataMember(Name = "p_forrageio")] public double PForrageio { get; set; }
+    [DataMember(Name = "comportamento")] public string Comportamento { get; set; }
 
     [DataMember(Name = "chlor_a_ambiente")]
-    public decimal ChlorAAmbiente { get; set; }
+    public double ChlorAAmbiente { get; set; }
 
-    [DataMember(Name = "ssha_ambiente")] public decimal SshaAmbiente { get; set; }
+    [DataMember(Name = "ssha_ambiente")] public double SshaAmbiente { get; set; }
 }

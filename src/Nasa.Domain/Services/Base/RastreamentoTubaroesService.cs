@@ -65,20 +65,23 @@ public class RastreamentoTubaroesService : IRastreamentoTubaroesService
 
         return result;
     }
-    
-    public async Task<ProcessResult> Insert(RastreamentoTubaroes item)
+
+    public async Task<ProcessResult> Insert(IEnumerable<RastreamentoTubaroes> items)
     {
         ProcessResult processResult = new ProcessResult() { ProcessMessage = AppStrings.INF_RegistroCriadoSucesso };
-    
+
         try
         {
-            if (await PkExists(item))
+            foreach (var item in items)
             {
-                return new ProcessResult()
-                    { Success = false, ProcessMessage = AppStrings.ERR_UsernameRegistrado };
+                if (await PkExists(item))
+                {
+                    return new ProcessResult()
+                        { Success = false, ProcessMessage = AppStrings.ERR_UsernameRegistrado };
+                }
             }
-    
-            await _rastreamentoTubaroesRepository.Insert(item);
+
+            await _rastreamentoTubaroesRepository.Insert(items);
         }
         catch (ProcessException ex)
         {
@@ -88,7 +91,7 @@ public class RastreamentoTubaroesService : IRastreamentoTubaroesService
         {
             processResult.RecordException(ex, AppStrings.ERR_FalhaInserirRegistro);
         }
-    
+
         return processResult;
     }
 
@@ -107,5 +110,4 @@ public class RastreamentoTubaroesService : IRastreamentoTubaroesService
 
         return query > 0;
     }
-
 }

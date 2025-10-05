@@ -64,7 +64,7 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         return resultado.FirstOrDefault();
     }
 
-    public async Task<int> Insert(RastreamentoTubaroes item)
+    public async Task<int> Insert(IEnumerable<RastreamentoTubaroes> item)
     {
         const string sql = @"
                 INSERT INTO rastreamento_tubaroes (
@@ -87,7 +87,13 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
             item.Id,
             item.Tempo,
             // Status
+            item.Lat,
+            item.Lon,
+            item.TempCc,
+            item.PForrageio,
             item.Comportamento,
+            item.ChlorAAmbiente,
+            item.SshaAmbiente,
             // Columns Filters
             // Pagination.
             item.Pagination.StartRecordNumber,
@@ -137,13 +143,13 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
             parameters.Add("Tempo", item.Tempo.Value);
         }
         
-        if (item.Comportamento > 0)
+        if (!string.IsNullOrEmpty(item.Comportamento))
         {
             conditions.Add("rast.comportamento = @Comportamento");
             parameters.Add("Comportamento", item.Comportamento);
         }
 
-        if (item.Lat != 0)
+        if (item.Lat > 0)
         {
             conditions.Add("rast.lat = @Lat");
             parameters.Add("Lat", item.Lat);
@@ -153,6 +159,30 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         {
             conditions.Add("rast.lon = @Lon");
             parameters.Add("Lon", item.Lon);
+        }
+
+        if (item.TempCc > 0)
+        {
+            conditions.Add("rast.temp_cc = @TempCc");
+            parameters.Add("TempCc", item.TempCc);
+        }
+        
+        if (item.PForrageio > 0)
+        {
+            conditions.Add("rast.p_forrageio = @PForrageio");
+            parameters.Add("PForrageio", item.PForrageio);
+        }
+        
+        if (item.ChlorAAmbiente > 0)
+        {
+            conditions.Add("rast.chlor_a_ambiente = @ChlorAAmbiente");
+            parameters.Add("ChlorAAmbiente", item.ChlorAAmbiente);
+        }
+        
+        if (item.SshaAmbiente > 0)
+        {
+            conditions.Add("rast.ssha_ambiente = @SshaAmbiente");
+            parameters.Add("SshaAmbiente", item.SshaAmbiente);
         }
 
         // Filtro geral (busca em múltiplos campos)
