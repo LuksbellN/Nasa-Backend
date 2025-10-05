@@ -68,9 +68,22 @@ public class RastreamentoTubaroesController : BaseController
         return ApiResponseUtil.SetApiResponse(this, await result, true);
     }
     
+    [HttpGet]
+    [Route("v1/latest-positions")]
+    public async Task<IActionResult> GetLatestPositions()
+    {
+        BaseControllerLog.LogProccessBeingProduced(
+            "Get",
+            "API",
+            string.Format("Getting latest positions for all sharks")
+        );
+
+        var result = _rastreamentoTubaroesService.SelectLatestPositions();
+        return ApiResponseUtil.SetApiResponse(this, await result);
+    }
+    
     [HttpPost]
     [Route("v1/")]
-    [IpWhitelist] // Apenas IPs autorizados podem inserir dados
     public async Task<IActionResult> Post([FromBody] IEnumerable<RoboData> roboDtos)
     {
         BaseControllerLog.LogProccessBeingProduced(

@@ -11,4 +11,6 @@ public interface IRastreamentoTubaroesRepository
     Task<long> CountSelect(RastreamentoTubaroes item);
     
     Task<int> Insert(IEnumerable<RastreamentoTubaroes> item);
+    
+    Task<IEnumerable<RastreamentoTubaroes>> SelectLatestPositions();
 }

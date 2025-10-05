@@ -9,5 +9,7 @@ public interface IRastreamentoTubaroesService
     Task<ProcessResult> SelectById(RastreamentoTubaroes item);
    
     Task<ProcessResult> Insert(IEnumerable<RastreamentoTubaroes> item);
+    
+    Task<ProcessResult> SelectLatestPositions();
 
 }

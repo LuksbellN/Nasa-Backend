@@ -1,4 +1,5 @@
-﻿using Nasa.Domain.Model;
+﻿using System.Xml.Linq;
+using Nasa.Domain.Model;
 using Nasa.Domain.Repositories;
 using Nasa.Domain.Services.Interfaces;
 using Nasa.Resources;
@@ -72,16 +73,23 @@ public class RastreamentoTubaroesService : IRastreamentoTubaroesService
 
         try
         {
+            var validItems = new List<RastreamentoTubaroes>();
+
             foreach (var item in items)
             {
-                if (await PkExists(item))
+                if (!await PkExists(item))
                 {
-                    return new ProcessResult()
-                        { Success = false, ProcessMessage = AppStrings.ERR_UsernameRegistrado };
+                    validItems.Add(item);
                 }
             }
+            
+            if (!validItems.Any())
+            {
+                return new ProcessResult()
+                    { Success = false, ProcessMessage = AppStrings.ERR_FalhaInserirRegistro };
+            }
 
-            await _rastreamentoTubaroesRepository.Insert(items);
+            await _rastreamentoTubaroesRepository.Insert(validItems);
         }
         catch (ProcessException ex)
         {
@@ -109,5 +117,28 @@ public class RastreamentoTubaroesService : IRastreamentoTubaroesService
         });
 
         return query > 0;
+    }
+
+    public async Task<ProcessResult> SelectLatestPositions()
+    {
+        ProcessResult result = new ProcessResult();
+
+        try
+        {
+            result = new ProcessResult()
+            {
+                Data = await _rastreamentoTubaroesRepository.SelectLatestPositions()
+            };
+        }
+        catch (ProcessException ex)
+        {
+            result.RecordException(ex, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            result.RecordException(ex, AppStrings.ERR_FalhaRecuperarRegistros);
+        }
+
+        return result;
     }
 }

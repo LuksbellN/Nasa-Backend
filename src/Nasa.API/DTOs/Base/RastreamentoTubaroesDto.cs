@@ -9,10 +9,10 @@ public class RastreamentoTubaroesDto
 
     [DataMember(Name = "tempo")] public DateTime? Tempo { get; set; }
 
-    [DataMember(Name = "lat")] public int Lat { get; set; }
+    [DataMember(Name = "lat")] public double Lat { get; set; }
 
-    [DataMember(Name = "lon")] public int Lon { get; set; }
-    [DataMember(Name = "temp_cc")] public int TempCc { get; set; }
+    [DataMember(Name = "lon")] public double Lon { get; set; }
+    [DataMember(Name = "temp_cc")] public double TempCc { get; set; }
     [DataMember(Name = "p_forrageio")] public double PForrageio { get; set; }
     [DataMember(Name = "comportamento")] public string Comportamento { get; set; }
 

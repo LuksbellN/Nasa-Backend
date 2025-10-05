@@ -259,4 +259,35 @@ public class RastreamentoTubaroesRepository : NpgsqlDapperHelper, IRastreamentoT
         return $"ORDER BY {orderBy}";
     }
 
+    public async Task<IEnumerable<RastreamentoTubaroes>> SelectLatestPositions()
+    {
+        const string query = @"
+            SELECT 
+                rast.id as Id,
+                rast.tempo as Tempo,
+                rast.temp_cC as TempCc,
+                rast.lat as Lat,
+                rast.lon as Lon,
+                rast.p_forrageio as PForrageio,
+                rast.comportamento as Comportamento,
+                rast.chlor_a_ambiente as ChlorAAmbiente,
+                rast.ssha_ambiente as SshaAmbiente,
+                ST_AsText(geom) as Geometria
+            FROM rastreamento_tubaroes rast
+            INNER JOIN (
+                SELECT id, MAX(tempo) as max_tempo
+                FROM rastreamento_tubaroes
+                GROUP BY id
+            ) latest ON rast.id = latest.id AND rast.tempo = latest.max_tempo
+            ORDER BY rast.id";
+
+        var result = await this.QueryAsync<RastreamentoTubaroes>(
+            false,
+            query,
+            null
+        );
+
+        return result;
+    }
+
 }
