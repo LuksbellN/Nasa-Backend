@@ -14,14 +14,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Configuração do CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("NasaPolicy", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithExposedHeaders("Content-Disposition");
+        policy.AllowAnyOrigin()      // Permite qualquer origem
+            .AllowAnyMethod()      // Permite GET, POST, PUT, DELETE, etc
+            .AllowAnyHeader();     // Permite qualquer header
     });
 });
+
 
 
 // Configuração do Swagger
@@ -65,7 +65,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseCors("QKDPolicy");
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

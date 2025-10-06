@@ -49,24 +49,6 @@ public class RastreamentoTubaroesController : BaseController
         return ApiResponseUtil.SetApiResponse(this, await result);
     }
 
-    [HttpGet]
-    [Route("v1/{idRastreamentoTubaroes}")]
-    public async Task<IActionResult> GetRastreamentoTubaroes([FromRoute] int idRastreamentoTubaroes)
-    {
-        BaseControllerLog.LogProccessBeingProduced(
-            "Get",
-            "API",
-            string.Format("Getting 'RastreamentoTubaroes' {0}", idRastreamentoTubaroes)
-        );
-
-        var typeFilter = new RastreamentoTubaroes()
-        {
-            Id = idRastreamentoTubaroes,
-        };
-
-        var result = _rastreamentoTubaroesService.SelectById(typeFilter);
-        return ApiResponseUtil.SetApiResponse(this, await result, true);
-    }
     
     [HttpGet]
     [Route("v1/latest-positions")]
@@ -81,6 +63,7 @@ public class RastreamentoTubaroesController : BaseController
         var result = _rastreamentoTubaroesService.SelectLatestPositions();
         return ApiResponseUtil.SetApiResponse(this, await result);
     }
+    
     
     [HttpPost]
     [Route("v1/")]
