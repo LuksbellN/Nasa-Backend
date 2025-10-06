@@ -66,15 +66,23 @@ postgresql://postgres:senha@containers-us-west-xxx.railway.app:7432/railway
 
 1. Clique no serviço da API que acabou de criar
 2. Vá na aba **"Variables"**
-3. Adicione as seguintes variáveis:
+3. Clique em **"+ New Variable"**
+4. Adicione as seguintes variáveis **UMA POR VEZ**:
 
-| Variável | Valor |
-|----------|-------|
-| `ASPNETCORE_ENVIRONMENT` | `Production` |
-| `DATABASE_URL` | (cole a string de conexão do PostgreSQL) |
-| `ASPNETCORE_URLS` | `http://0.0.0.0:8080` |
+| Variável | Valor | Descrição |
+|----------|-------|-----------|
+| `ASPNETCORE_ENVIRONMENT` | `Production` | Define o ambiente |
+| `DATABASE_URL` | *copie do PostgreSQL* | String de conexão do banco |
+| `ASPNETCORE_URLS` | `http://0.0.0.0:8080` | Porta da aplicação |
+| `PORT` | `8080` | Porta do Railway |
 
-**IMPORTANTE**: A variável `DATABASE_URL` deve ser a mesma do seu banco PostgreSQL no Railway!
+**COMO PEGAR A DATABASE_URL:**
+1. No mesmo projeto, clique no serviço **PostgreSQL**
+2. Vá em **"Variables"**
+3. Copie o valor da variável `DATABASE_URL`
+4. Cole na variável `DATABASE_URL` do serviço da API
+
+**IMPORTANTE**: Se a DATABASE_URL do PostgreSQL começar com `postgres://`, substitua por `postgresql://`
 
 ### 3.3 Configurar Porta
 
@@ -188,36 +196,98 @@ Como a API está na nuvem, você precisa ajustar o `IpWhitelist` no `appsettings
 
 ## 🚨 Troubleshooting
 
-### Problema: "Connection refused" ou "Database connection error"
+### ❌ Erro: "Connection refused" ou "Database connection error"
+
+**Causas possíveis:**
+- Variável `DATABASE_URL` não configurada
+- String de conexão incorreta
+- PostgreSQL não está no mesmo projeto
 
 **Solução:**
-1. Verifique se a variável `DATABASE_URL` está configurada corretamente
-2. Certifique-se de que o PostgreSQL está no mesmo projeto do Railway
-3. Teste a conexão manualmente usando as credenciais
+1. Vá no serviço **PostgreSQL** → **Variables** → Copie `DATABASE_URL`
+2. Vá no serviço da **API** → **Variables** → Cole em `DATABASE_URL`
+3. Se começar com `postgres://`, mude para `postgresql://`
+4. Clique em **"Restart"** no serviço da API
 
-### Problema: "Port 5000 already in use"
+### ❌ Erro: "Application failed to start"
+
+**Causas possíveis:**
+- Porta incorreta
+- Variáveis de ambiente faltando
+- Erro no código
 
 **Solução:**
-1. Certifique-se de que `ASPNETCORE_URLS` está definida como `http://0.0.0.0:8080`
-2. Verifique a porta configurada no Railway (deve ser 8080)
+1. Verifique os logs em **"Deployments"** → Clique no deployment → **"View logs"**
+2. Verifique se as variáveis estão corretas:
+   - `ASPNETCORE_URLS` = `http://0.0.0.0:8080`
+   - `PORT` = `8080`
+   - `ASPNETCORE_ENVIRONMENT` = `Production`
+3. Procure por erros específicos nos logs
 
-### Problema: "404 Not Found" nos endpoints
+### ❌ Erro: "502 Bad Gateway"
+
+**Causas possíveis:**
+- Aplicação não está escutando na porta 8080
+- Aplicação crashou após iniciar
 
 **Solução:**
-1. Verifique se o Swagger está acessível em `/swagger`
-2. Certifique-se de usar o caminho completo: `/api/RastreamentoTubaroes/v1/`
+1. Verifique os logs da aplicação
+2. Teste o endpoint `/health`:
+   ```
+   https://seu-app.up.railway.app/health
+   ```
+3. Verifique se `ASPNETCORE_URLS` está correto
+4. Reinicie o serviço
+
+### ❌ Erro: "404 Not Found" nos endpoints
+
+**Causas possíveis:**
+- URL incorreta
+- Roteamento mal configurado
+
+**Solução:**
+1. Acesse o Swagger primeiro: `https://seu-app.up.railway.app/swagger`
+2. Use o caminho completo: `/api/RastreamentoTubaroes/v1/`
 3. Verifique os logs para erros de roteamento
 
-### Problema: Build falha
+### ❌ Erro: Build falha no Railway
+
+**Causas possíveis:**
+- Dockerfile incorreto
+- Dependências faltando
+- Erro de compilação
 
 **Solução:**
 1. Verifique os logs de build no Railway
-2. Certifique-se de que todos os arquivos `.csproj` estão no repositório
-3. Teste o build localmente:
+2. Teste localmente:
    ```bash
    docker build -t nasa-api .
-   docker run -p 8080:8080 nasa-api
+   docker run -p 8080:8080 -e DATABASE_URL="sua-string" nasa-api
    ```
+3. Certifique-se de que todos `.csproj` estão no Git
+
+### ❌ Erro: "NullReferenceException" em connectionString
+
+**Causas possíveis:**
+- `DATABASE_URL` não definida
+- String de conexão vazia
+
+**Solução:**
+1. Confirme que `DATABASE_URL` existe nas variáveis de ambiente
+2. Reinicie o serviço após adicionar a variável
+3. Verifique os logs: deve aparecer a connection string (censurada)
+
+### 📋 Checklist de Verificação
+
+Antes de pedir ajuda, verifique:
+- [ ] `DATABASE_URL` está configurada e correta
+- [ ] `ASPNETCORE_URLS` = `http://0.0.0.0:8080`
+- [ ] `ASPNETCORE_ENVIRONMENT` = `Production`
+- [ ] `PORT` = `8080`
+- [ ] PostgreSQL está no mesmo projeto
+- [ ] Código foi commitado e pushed para o GitHub
+- [ ] Build foi concluído com sucesso
+- [ ] Logs não mostram erros críticos
 
 ---
 

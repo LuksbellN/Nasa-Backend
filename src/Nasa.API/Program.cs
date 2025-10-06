@@ -52,16 +52,18 @@ BootStrapper.Inject(builder.Services, builder.Configuration);
 var app = builder.Build();
 
 // Configuração do pipeline
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Nasa API V1");
+});
+
+// Remover UseHttpsRedirection em produção (Railway gerencia SSL)
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Washflow API V1");
-    });
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -72,7 +74,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Configuração de fallback para SPA (se necessário)
-app.MapFallbackToFile("index.html");
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
+// Fallback apenas se existir index.html
+if (File.Exists(Path.Combine(app.Environment.WebRootPath ?? "wwwroot", "index.html")))
+{
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();

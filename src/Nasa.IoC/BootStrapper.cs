@@ -25,10 +25,14 @@ public static class BootStrapper
         /// <param name="configuration"></param>
         private static void DbConnectionFactory(IServiceCollection services, IConfiguration configuration)
         {
+            // Pega a connection string do appsettings ou da variável de ambiente
+            var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") 
+                                  ?? configuration.GetConnectionString("NpgsqlDbConnection");
+            
             // Dicionario de conexoes
             var connectionDict = new Dictionary<DatabaseConnectionName, string>
             {
-                { DatabaseConnectionName.NpgsqlDbConnection, configuration.GetConnectionString("NpgsqlDbConnection") },
+                { DatabaseConnectionName.NpgsqlDbConnection, connectionString },
             };
 
             // Injeta o Dicionario de conexoes
